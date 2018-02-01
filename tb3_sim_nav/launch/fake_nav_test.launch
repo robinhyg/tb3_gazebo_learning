@@ -1,0 +1,28 @@
+<launch>
+
+  <!-- Start the ArbotiX controller -->
+  <include file="$(find tb3_sim_bringup)/launch/tb3_empty_world.launch" />
+
+  <!-- Run the map server with the desired map -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find tb3_sim_nav)/maps/test_map.yaml"/>
+
+  <!-- The move_base node -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" clear_params="true" output="screen">
+    <rosparam file="$(find tb3_sim_nav)/config/move_base/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find tb3_sim_nav)/config/move_base/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find tb3_sim_nav)/config/move_base/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find tb3_sim_nav)/config/move_base/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find tb3_sim_nav)/config/move_base/base_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find tb3_sim_nav)/config/move_base/nav_test_params.yaml" command="load" />
+  </node>
+  
+  <!-- Run a static transform between /odom and /map -->
+  <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />
+  
+  <!-- Start the navigation test -->
+  <node pkg="tb3_sim_nav" type="nav_test.py" name="nav_test" output="screen">
+    <param name="rest_time" value="1" />
+    <param name="fake_test" value="true" />
+  </node>
+  
+</launch>
